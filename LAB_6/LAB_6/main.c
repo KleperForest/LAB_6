@@ -9,67 +9,51 @@
 //*********************************************************************
 
 #define F_CPU 16000000
+#define F_CPU 16000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-// Declaración de funciones
-void initUART9600(void);
-void setup(void);
+volatile char receivedChar = 0;
 
-// Variable global para almacenar el último byte recibido
-volatile uint8_t bufferRX = 0;
+void setup() {
+	// Configurar el puerto B como salida
+	DDRB = 0xFF; // Todos los pines del puerto B como salidas
+	// Inicializar la UART a 9600 baudios
+	initUART9600(); // Inicializar UART a 9600 baudios
+}
 
-int main(void)
-{
-	// Inicialización de la UART y configuración de pines
-	initUART9600();
-	setup();
+void loop() {
+	if (receivedChar != 0) {
+		// Muestra el carácter recibido en el puerto B
+		PORTB = receivedChar;
+		receivedChar = 0; // Reiniciar la variable para recibir un nuevo carácter
+	}
+}
+
+// Configuración de UART a 9600 baudios
+void initUART9600() {
+	// Configuración de pines RX y TX
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1 << RXCIE0); // Habilitar recepción, transmisión y la interrupción de recepción
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // Configurar tamaño de datos a 8 bits
+
+	// Configurar velocidad de baudios a 9600
+	UBRR0 = 103; // Para F_CPU 16MHz y baudrate de 9600
+}
+
+// ISR de recepción de UART
+ISR(USART_RX_vect) {
+	receivedChar = UDR0; // Almacena el carácter recibido
+}
+
+int main(void) {
+	setup(); // Configurar el microcontrolador
 
 	// Habilitar interrupciones globales
 	sei();
 
-	while (1)
-	{
-		// Si se recibe un byte
-		if (bufferRX != 0)
-		{
-			// Mostrar el carácter recibido en los LEDs
-			PORTB = bufferRX;
-			
-			// Limpiar el buffer después de procesar el byte recibido
-			bufferRX = 0;
-		}
+	while (1) {
+		loop(); // Loop principal
 	}
+
 	return 0;
-}
-
-// Configuración de pines
-void setup(void)
-{
-	// Configurar puerto B como salida para LEDs
-	DDRB = 0xFF;
-}
-
-// Inicialización de UART a 9600 baudios
-void initUART9600()
-{
-	// Configuración de pines RX y TX
-	DDRD &= ~(1 << DDD0); // RX como entrada
-	DDRD |= (1 << DDD1);   // TX como salida
-
-	// Habilitar recepción y transmisión
-	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-
-	// Configurar velocidad de baudios a 9600
-	UBRR0 = 103;
-
-	// Configurar tamaño de datos a 8 bits, sin paridad, 1 bit de parada
-	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
-}
-
-// ISR de recepción de UART
-ISR(USART_RX_vect)
-{
-	// Almacenar el byte recibido en el buffer
-	bufferRX = UDR0;
 }
