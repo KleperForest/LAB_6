@@ -16,6 +16,7 @@
 void initUART9600(void);
 void writeUART(char Caracter);
 void writeTextUART(char* Texto);
+void setup(void);// Modulo de pines
 
 volatile uint8_t bufferTX;
 
@@ -23,18 +24,18 @@ int main(void)
 {
     initUART9600();
 	sei();
-	writeUART('H');
-	writeUART('o');
-	writeUART('l');
-	writeUART('a');
-	writeUART(10);
-	writeUART(13);
-	
-	writeTextUART("Hola Mundo");
-	
+	writeUART(0);
+	setup();
     while (1) 
     {
+	PORTB = bufferTX;	
     }
+}
+
+void setup(void) {
+	// Configurar pines PB0 a PB5 como salidas para LEDs.
+	DDRB |= 0b00111111;
+
 }
 
 void initUART9600(){
@@ -66,13 +67,6 @@ void writeUART(char Caracter){
 	while(!(UCSR0A &(1<<UDRE0)));// Enviar a compu
 	UDR0 = Caracter;
 }
-void writeTextUART(char* Texto){
-	int i;
-	for(i=0; Texto[i]!='\0'; i++){
-		while (!(UCSR0A &(1<<UDRE0)));
-		UDR0 = Texto[i];
-	}
-}
 
 ISR(USART_RX_vect){ // Resepcion.
 	
@@ -80,6 +74,5 @@ ISR(USART_RX_vect){ // Resepcion.
 	
 	while(!(UCSR0A &(1<<UDRE0)));//Enviar de regreso
 	UDR0 = bufferTX;
-	
 	
 }
