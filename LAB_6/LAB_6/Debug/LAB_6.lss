@@ -3,31 +3,31 @@ LAB_6.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  0000019c  2**0
+  0 .data         00000000  00800100  00800100  00000224  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000128  00000000  00000000  00000074  2**1
+  1 .text         000001b0  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000001  00800100  00800100  0000019c  2**0
+  2 .bss          00000001  00800100  00800100  00000224  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  0000019c  2**0
+  3 .comment      00000030  00000000  00000000  00000224  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000001cc  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000254  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000040  00000000  00000000  0000020c  2**0
+  5 .debug_aranges 00000040  00000000  00000000  00000294  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000739  00000000  00000000  0000024c  2**0
+  6 .debug_info   000007a9  00000000  00000000  000002d4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000068f  00000000  00000000  00000985  2**0
+  7 .debug_abbrev 000006e0  00000000  00000000  00000a7d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000295  00000000  00000000  00001014  2**0
+  8 .debug_line   000002de  00000000  00000000  0000115d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000074  00000000  00000000  000012ac  2**2
+  9 .debug_frame  00000084  00000000  00000000  0000143c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000003b3  00000000  00000000  00001320  2**0
+ 10 .debug_str    000003c8  00000000  00000000  000014c0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    0000003c  00000000  00000000  000016d3  2**0
+ 11 .debug_loc    000000e9  00000000  00000000  00001888  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000030  00000000  00000000  0000170f  2**0
+ 12 .debug_ranges 00000030  00000000  00000000  00001971  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -51,7 +51,7 @@ Disassembly of section .text:
   3c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   40:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   44:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
-  48:	0c 94 7a 00 	jmp	0xf4	; 0xf4 <__vector_18>
+  48:	0c 94 67 00 	jmp	0xce	; 0xce <__vector_18>
   4c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   50:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   54:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
@@ -81,17 +81,17 @@ Disassembly of section .text:
   7e:	a1 30       	cpi	r26, 0x01	; 1
   80:	b2 07       	cpc	r27, r18
   82:	e1 f7       	brne	.-8      	; 0x7c <.do_clear_bss_loop>
-  84:	0e 94 6e 00 	call	0xdc	; 0xdc <main>
-  88:	0c 94 92 00 	jmp	0x124	; 0x124 <_exit>
+  84:	0e 94 8e 00 	call	0x11c	; 0x11c <main>
+  88:	0c 94 d6 00 	jmp	0x1ac	; 0x1ac <_exit>
 
 0000008c <__bad_interrupt>:
   8c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000090 <setup>:
-    }
 }
 
-void setup(void) {
+void setup(void)
+{
 	// Configurar pines PB0 a PB5 como salidas para LEDs.
 	DDRB |= 0b00111111;
   90:	84 b1       	in	r24, 0x04	; 4
@@ -100,48 +100,48 @@ void setup(void) {
   96:	08 95       	ret
 
 00000098 <initUART9600>:
-
 }
 
-void initUART9600(){
-	//Paso 1:  RX como entrada y TX como saldia
-	DDRD &= ~(1<<DDD0);
+void initUART9600()
+{
+	// Paso 1: RX como entrada y TX como salida
+	DDRD &= ~(1 << DDD0);
   98:	8a b1       	in	r24, 0x0a	; 10
   9a:	8e 7f       	andi	r24, 0xFE	; 254
   9c:	8a b9       	out	0x0a, r24	; 10
-	DDRD |=(1<<DDD1);
+	DDRD |= (1 << DDD1);
   9e:	8a b1       	in	r24, 0x0a	; 10
   a0:	82 60       	ori	r24, 0x02	; 2
   a2:	8a b9       	out	0x0a, r24	; 10
-	
-	//Paso 2: Configurar UCSR0A
-	//Registro A
+
+	// Paso 2: Configurar UCSR0A
+	// Registro A
 	UCSR0A = 0;
   a4:	10 92 c0 00 	sts	0x00C0, r1	; 0x8000c0 <__TEXT_REGION_LENGTH__+0x7f80c0>
-	
-	//Paso 3: Configurar UCSR0B
+
+	// Paso 3: Configurar UCSR0B
 	UCSR0B = 0;
   a8:	e1 ec       	ldi	r30, 0xC1	; 193
   aa:	f0 e0       	ldi	r31, 0x00	; 0
   ac:	10 82       	st	Z, r1
-	//Habilitar recepcion y transmision
-	UCSR0B |= (1<<RXCIE0) | (1<<RXEN0) | (1<<TXEN0);
+	// Habilitar recepción y transmisión
+	UCSR0B |= (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0);
   ae:	80 81       	ld	r24, Z
   b0:	88 69       	ori	r24, 0x98	; 152
   b2:	80 83       	st	Z, r24
-	
-	//Paso 4: Configurar UCSR0C> ASYNCRONO, PARIDAD NO. bit de stop. 8 caracteres.
+
+	// Paso 4: Configurar UCSR0C> ASINCRONO, PARIDAD NO. Bit de stop. 8 caracteres.
 	UCSR0C = 0;
   b4:	e2 ec       	ldi	r30, 0xC2	; 194
   b6:	f0 e0       	ldi	r31, 0x00	; 0
   b8:	10 82       	st	Z, r1
-	
-	UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
+
+	UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00);
   ba:	80 81       	ld	r24, Z
   bc:	86 60       	ori	r24, 0x06	; 6
   be:	80 83       	st	Z, r24
-	
-	//Paso 5: Configurar Velocidad de Boudare: 9600
+
+	// Paso 5: Configurar Velocidad de Baudrate: 9600
 	UBRR0 = 103;
   c0:	87 e6       	ldi	r24, 0x67	; 103
   c2:	90 e0       	ldi	r25, 0x00	; 0
@@ -149,77 +149,175 @@ void initUART9600(){
   c8:	80 93 c4 00 	sts	0x00C4, r24	; 0x8000c4 <__TEXT_REGION_LENGTH__+0x7f80c4>
   cc:	08 95       	ret
 
-000000ce <writeUART>:
-	
+000000ce <__vector_18>:
 }
 
-//Interrupcion
-void writeUART(char Caracter){
-	while(!(UCSR0A &(1<<UDRE0)));// Enviar a compu
-  ce:	90 91 c0 00 	lds	r25, 0x00C0	; 0x8000c0 <__TEXT_REGION_LENGTH__+0x7f80c0>
-  d2:	95 ff       	sbrs	r25, 5
-  d4:	fc cf       	rjmp	.-8      	; 0xce <writeUART>
-	UDR0 = Caracter;
-  d6:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
-  da:	08 95       	ret
+// Interrupcion
+ISR(USART_RX_vect)
+{ // Recepción.
+  ce:	1f 92       	push	r1
+  d0:	0f 92       	push	r0
+  d2:	0f b6       	in	r0, 0x3f	; 63
+  d4:	0f 92       	push	r0
+  d6:	11 24       	eor	r1, r1
+  d8:	8f 93       	push	r24
 
-000000dc <main>:
+	bufferRX = UDR0;
+  da:	80 91 c6 00 	lds	r24, 0x00C6	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
+  de:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 
-volatile uint8_t bufferTX;
+	while (!(UCSR0A & (1 << UDRE0)))
+  e2:	80 91 c0 00 	lds	r24, 0x00C0	; 0x8000c0 <__TEXT_REGION_LENGTH__+0x7f80c0>
+  e6:	85 ff       	sbrs	r24, 5
+  e8:	fc cf       	rjmp	.-8      	; 0xe2 <__vector_18+0x14>
+	; // Enviar de regreso
+	UDR0 = bufferRX;
+  ea:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+  ee:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
+}
+  f2:	8f 91       	pop	r24
+  f4:	0f 90       	pop	r0
+  f6:	0f be       	out	0x3f, r0	; 63
+  f8:	0f 90       	pop	r0
+  fa:	1f 90       	pop	r1
+  fc:	18 95       	reti
+
+000000fe <decimalToBinary>:
+
+void decimalToBinary(uint8_t decimal, uint8_t binary[])
+{
+	int i = 0;
+  fe:	20 e0       	ldi	r18, 0x00	; 0
+ 100:	30 e0       	ldi	r19, 0x00	; 0
+	while (decimal > 0)
+ 102:	09 c0       	rjmp	.+18     	; 0x116 <decimalToBinary+0x18>
+	{
+		binary[i] = decimal % 2;
+ 104:	fb 01       	movw	r30, r22
+ 106:	e2 0f       	add	r30, r18
+ 108:	f3 1f       	adc	r31, r19
+ 10a:	98 2f       	mov	r25, r24
+ 10c:	91 70       	andi	r25, 0x01	; 1
+ 10e:	90 83       	st	Z, r25
+		decimal = decimal / 2;
+ 110:	86 95       	lsr	r24
+		i++;
+ 112:	2f 5f       	subi	r18, 0xFF	; 255
+ 114:	3f 4f       	sbci	r19, 0xFF	; 255
+}
+
+void decimalToBinary(uint8_t decimal, uint8_t binary[])
+{
+	int i = 0;
+	while (decimal > 0)
+ 116:	81 11       	cpse	r24, r1
+ 118:	f5 cf       	rjmp	.-22     	; 0x104 <decimalToBinary+0x6>
+	{
+		binary[i] = decimal % 2;
+		decimal = decimal / 2;
+		i++;
+	}
+}
+ 11a:	08 95       	ret
+
+0000011c <main>:
+void decimalToBinary(uint8_t decimal, uint8_t binary[]);
+
+volatile uint8_t bufferRX = 0;
 
 int main(void)
 {
-    initUART9600();
-  dc:	0e 94 4c 00 	call	0x98	; 0x98 <initUART9600>
+ 11c:	cf 93       	push	r28
+ 11e:	df 93       	push	r29
+ 120:	cd b7       	in	r28, 0x3d	; 61
+ 122:	de b7       	in	r29, 0x3e	; 62
+ 124:	28 97       	sbiw	r28, 0x08	; 8
+ 126:	0f b6       	in	r0, 0x3f	; 63
+ 128:	f8 94       	cli
+ 12a:	de bf       	out	0x3e, r29	; 62
+ 12c:	0f be       	out	0x3f, r0	; 63
+ 12e:	cd bf       	out	0x3d, r28	; 61
+	initUART9600();
+ 130:	0e 94 4c 00 	call	0x98	; 0x98 <initUART9600>
 	sei();
-  e0:	78 94       	sei
-	writeUART(0);
-  e2:	80 e0       	ldi	r24, 0x00	; 0
-  e4:	0e 94 67 00 	call	0xce	; 0xce <writeUART>
+ 134:	78 94       	sei
 	setup();
-  e8:	0e 94 48 00 	call	0x90	; 0x90 <setup>
-    while (1) 
-    {
-	PORTB = bufferTX;	
-  ec:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
-  f0:	85 b9       	out	0x05, r24	; 5
-  f2:	fc cf       	rjmp	.-8      	; 0xec <main+0x10>
+ 136:	0e 94 48 00 	call	0x90	; 0x90 <setup>
+	while (1)
+	{
+		if (bufferRX == 10) // Cuando se recibe un 10
+ 13a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 13e:	8a 30       	cpi	r24, 0x0A	; 10
+ 140:	e1 f7       	brne	.-8      	; 0x13a <main+0x1e>
+		{
+			uint8_t binary[8] = {0}; // Array para almacenar el número binario
+ 142:	be 01       	movw	r22, r28
+ 144:	6f 5f       	subi	r22, 0xFF	; 255
+ 146:	7f 4f       	sbci	r23, 0xFF	; 255
+ 148:	88 e0       	ldi	r24, 0x08	; 8
+ 14a:	fb 01       	movw	r30, r22
+ 14c:	11 92       	st	Z+, r1
+ 14e:	8a 95       	dec	r24
+ 150:	e9 f7       	brne	.-6      	; 0x14c <main+0x30>
+			decimalToBinary(bufferRX, binary); // Convertir el valor decimal a binario
+ 152:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 156:	0e 94 7f 00 	call	0xfe	; 0xfe <decimalToBinary>
+			for (int i = 0; i < 6; i++) // Iterar sobre los bits binarios
+ 15a:	80 e0       	ldi	r24, 0x00	; 0
+ 15c:	90 e0       	ldi	r25, 0x00	; 0
+ 15e:	22 c0       	rjmp	.+68     	; 0x1a4 <main+0x88>
+			{
+				if (binary[i])
+ 160:	e1 e0       	ldi	r30, 0x01	; 1
+ 162:	f0 e0       	ldi	r31, 0x00	; 0
+ 164:	ec 0f       	add	r30, r28
+ 166:	fd 1f       	adc	r31, r29
+ 168:	e8 0f       	add	r30, r24
+ 16a:	f9 1f       	adc	r31, r25
+ 16c:	20 81       	ld	r18, Z
+ 16e:	22 23       	and	r18, r18
+ 170:	61 f0       	breq	.+24     	; 0x18a <main+0x6e>
+				PORTB |= (1 << i); // Establecer el bit correspondiente en el puerto B
+ 172:	45 b1       	in	r20, 0x05	; 5
+ 174:	21 e0       	ldi	r18, 0x01	; 1
+ 176:	30 e0       	ldi	r19, 0x00	; 0
+ 178:	08 2e       	mov	r0, r24
+ 17a:	02 c0       	rjmp	.+4      	; 0x180 <main+0x64>
+ 17c:	22 0f       	add	r18, r18
+ 17e:	33 1f       	adc	r19, r19
+ 180:	0a 94       	dec	r0
+ 182:	e2 f7       	brpl	.-8      	; 0x17c <main+0x60>
+ 184:	24 2b       	or	r18, r20
+ 186:	25 b9       	out	0x05, r18	; 5
+ 188:	0c c0       	rjmp	.+24     	; 0x1a2 <main+0x86>
+				else
+				PORTB &= ~(1 << i); // Borrar el bit correspondiente en el puerto B
+ 18a:	45 b1       	in	r20, 0x05	; 5
+ 18c:	21 e0       	ldi	r18, 0x01	; 1
+ 18e:	30 e0       	ldi	r19, 0x00	; 0
+ 190:	08 2e       	mov	r0, r24
+ 192:	02 c0       	rjmp	.+4      	; 0x198 <main+0x7c>
+ 194:	22 0f       	add	r18, r18
+ 196:	33 1f       	adc	r19, r19
+ 198:	0a 94       	dec	r0
+ 19a:	e2 f7       	brpl	.-8      	; 0x194 <main+0x78>
+ 19c:	20 95       	com	r18
+ 19e:	24 23       	and	r18, r20
+ 1a0:	25 b9       	out	0x05, r18	; 5
+	{
+		if (bufferRX == 10) // Cuando se recibe un 10
+		{
+			uint8_t binary[8] = {0}; // Array para almacenar el número binario
+			decimalToBinary(bufferRX, binary); // Convertir el valor decimal a binario
+			for (int i = 0; i < 6; i++) // Iterar sobre los bits binarios
+ 1a2:	01 96       	adiw	r24, 0x01	; 1
+ 1a4:	86 30       	cpi	r24, 0x06	; 6
+ 1a6:	91 05       	cpc	r25, r1
+ 1a8:	dc f2       	brlt	.-74     	; 0x160 <main+0x44>
+ 1aa:	c7 cf       	rjmp	.-114    	; 0x13a <main+0x1e>
 
-000000f4 <__vector_18>:
-void writeUART(char Caracter){
-	while(!(UCSR0A &(1<<UDRE0)));// Enviar a compu
-	UDR0 = Caracter;
-}
+000001ac <_exit>:
+ 1ac:	f8 94       	cli
 
-ISR(USART_RX_vect){ // Resepcion.
-  f4:	1f 92       	push	r1
-  f6:	0f 92       	push	r0
-  f8:	0f b6       	in	r0, 0x3f	; 63
-  fa:	0f 92       	push	r0
-  fc:	11 24       	eor	r1, r1
-  fe:	8f 93       	push	r24
-	
-	bufferTX = UDR0;
- 100:	80 91 c6 00 	lds	r24, 0x00C6	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
- 104:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
-	
-	while(!(UCSR0A &(1<<UDRE0)));//Enviar de regreso
- 108:	80 91 c0 00 	lds	r24, 0x00C0	; 0x8000c0 <__TEXT_REGION_LENGTH__+0x7f80c0>
- 10c:	85 ff       	sbrs	r24, 5
- 10e:	fc cf       	rjmp	.-8      	; 0x108 <__vector_18+0x14>
-	UDR0 = bufferTX;
- 110:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 114:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7f80c6>
-	
- 118:	8f 91       	pop	r24
- 11a:	0f 90       	pop	r0
- 11c:	0f be       	out	0x3f, r0	; 63
- 11e:	0f 90       	pop	r0
- 120:	1f 90       	pop	r1
- 122:	18 95       	reti
-
-00000124 <_exit>:
- 124:	f8 94       	cli
-
-00000126 <__stop_program>:
- 126:	ff cf       	rjmp	.-2      	; 0x126 <__stop_program>
+000001ae <__stop_program>:
+ 1ae:	ff cf       	rjmp	.-2      	; 0x1ae <__stop_program>
