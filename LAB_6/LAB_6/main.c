@@ -23,15 +23,7 @@ int main(void)
 {
     initUART9600();
 	sei();
-	writeUART('H');
-	writeUART('o');
-	writeUART('l');
-	writeUART('a');
-	writeUART(10);
-	writeUART(13);
-	
 	writeTextUART("Hola Mundo");
-	
     while (1) 
     {
     }
@@ -62,10 +54,6 @@ void initUART9600(){
 }
 
 //Interrupcion
-void writeUART(char Caracter){
-	while(!(UCSR0A &(1<<UDRE0)));// Enviar a compu
-	UDR0 = Caracter;
-}
 void writeTextUART(char* Texto){
 	int i;
 	for(i=0; Texto[i]!='\0'; i++){
