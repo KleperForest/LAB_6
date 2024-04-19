@@ -23,13 +23,11 @@ int main(void)
 		{
 			uint8_t binary[8] = {0}; // Array para almacenar el número binario
 			decimalToBinary(bufferRX, binary); // Convertir el valor decimal a binario
-			for (int i = 0; i < 6; i++) // Iterar sobre los bits binarios
-			{
-				if (binary[i])
-				PORTB |= (1 << i); // Establecer el bit correspondiente en el puerto B
-				else
-				PORTB &= ~(1 << i); // Borrar el bit correspondiente en el puerto B
-			}
+			
+			// Asignar bits del PB0 al PB5
+			PORTB = (binary[0] << PB0) | (binary[1] << PB1) | (binary[2] << PB2) | (binary[3] << PB3) | (binary[4] << PB4) | (binary[5] << PB5);
+			// Asignar bits del PD4 al PD7
+			PORTD = (binary[6] << PD4) | (binary[7] << PD5) | (binary[8] << PD6) | (binary[9] << PD7);
 		}
 	}
 }
@@ -38,6 +36,8 @@ void setup(void)
 {
 	// Configurar pines PB0 a PB5 como salidas para LEDs.
 	DDRB |= 0b00111111;
+	// Configurar pines PD4 a PD7 como salidas para LEDs.
+	DDRD |= 0b11110000;
 }
 
 void initUART9600()
@@ -77,11 +77,8 @@ ISR(USART_RX_vect)
 
 void decimalToBinary(uint8_t decimal, uint8_t binary[])
 {
-	int i = 0;
-	while (decimal > 0)
+	for (int i = 0; i < 8; i++)
 	{
-		binary[i] = decimal % 2;
-		decimal = decimal / 2;
-		i++;
+		binary[i] = (decimal >> i) & 0x01;
 	}
 }
