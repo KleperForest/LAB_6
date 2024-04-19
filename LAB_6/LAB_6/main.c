@@ -14,7 +14,7 @@
 #include <avr/interrupt.h>
 
 void initUART9600(void);
-void writeUART(char Caracter);
+//void writeUART(char Caracter);
 void writeTextUART(char* Texto);
 
 volatile uint8_t bufferTX;
