@@ -9,9 +9,10 @@
 //*********************************************************************
 
 #define F_CPU 16000000
-#define F_CPU 16000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
+
+#define F_CPU 16000000UL
 
 volatile char receivedChar = 0;
 
@@ -40,9 +41,21 @@ void initUART9600() {
 	UBRR0 = 103; // Para F_CPU 16MHz y baudrate de 9600
 }
 
+void writeTextUART(char* Texto) {
+	int i;
+	for (i = 0; Texto[i] != '\0'; i++) {
+		while (!(UCSR0A & (1 << UDRE0)));
+		UDR0 = Texto[i];
+	}
+}
+
 // ISR de recepción de UART
 ISR(USART_RX_vect) {
 	receivedChar = UDR0; // Almacena el carácter recibido
+	// Puedes agregar procesamiento adicional aquí antes de enviar de vuelta
+	// Envío de vuelta solo después de procesamiento si es necesario
+	while(!(UCSR0A &(1<<UDRE0)));//Enviar de regreso
+	UDR0 = receivedChar;
 }
 
 int main(void) {
@@ -51,6 +64,7 @@ int main(void) {
 	// Habilitar interrupciones globales
 	sei();
 
+	writeTextUART("Hola Mundo");
 	while (1) {
 		loop(); // Loop principal
 	}
