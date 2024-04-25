@@ -1,18 +1,9 @@
-//*********************************************************************
-// Universidad del Valle de Guatemala
-// IE2023: Programación de Microcontroladores
-// Autor: Alan Gomez
-// Proyecto: LAB_6.c
-// Descripción: Sexto Laboratorio de Programación de Microcontroladores con lenguaje C.
-// Hardware: ATmega328p
-// Created: 4/18/2024 12:27:37 AM
-//*********************************************************************
-
-#define F_CPU 16000000
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdio.h>
 
-#define F_CPU 16000000UL
+#define F_CPU 16000000
 
 volatile char receivedChar = 0;
 
@@ -24,10 +15,30 @@ void setup() {
 }
 
 void loop() {
-	if (receivedChar != 0) {
-		// Muestra el carácter recibido en el puerto B
-		PORTB = receivedChar;
-		receivedChar = 0; // Reiniciar la variable para recibir un nuevo carácter
+	while (1) {
+		// Mostrar menú
+		writeTextUART("\n\rMenu:\n\r");
+		writeTextUART("1. Leer Potenciometro\n\r");
+		writeTextUART("2. Enviar ASCII\n\r");
+		writeTextUART("Seleccione una opción: ");
+
+		while (receivedChar == 0); // Esperar a que se reciba un carácter
+		char option = receivedChar;
+		receivedChar = 0;
+
+		switch(option) {
+			case '1':
+			// Leer valor del potenciómetro
+			readPotentiometer();
+			break;
+			case '2':
+			// Enviar ASCII
+			sendASCII();
+			break;
+			default:
+			writeTextUART("\n\rOpción no válida\n\r");
+			break;
+		}
 	}
 }
 
@@ -49,6 +60,39 @@ void writeTextUART(char* Texto) {
 	}
 }
 
+// Leer valor del potenciómetro
+void readPotentiometer() {
+	// Configurar ADC para leer el pin PC5
+	ADMUX = (1 << REFS0) | (1 << MUX0) | (1 << MUX2); // AVCC como referencia, PC5 como entrada
+	ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Habilitar ADC y configurar preescalador a 128
+
+	ADCSRA |= (1 << ADSC); // Iniciar conversión
+	while (ADCSRA & (1 << ADSC)); // Esperar a que la conversión termine
+
+	// Leer valor convertido
+	uint16_t value = ADC;
+
+	// Mostrar valor en la terminal
+	char buffer[20];
+	sprintf(buffer, "\n\rValor del potenciómetro: %d\n\r", value);
+	writeTextUART(buffer);
+}
+
+// Enviar códigos ASCII
+void sendASCII() {
+	writeTextUART("\n\rEnvía el código ASCII (0-255): ");
+
+	while (receivedChar == 0); // Esperar a que se reciba un carácter
+	uint8_t asciiCode = receivedChar;
+	receivedChar = 0;
+
+	// Enviar código ASCII al puerto serie
+	char buffer[20];
+	sprintf(buffer, "\n\rEnviando código ASCII: %c\n\r", asciiCode);
+	writeTextUART(buffer);
+	PORTB = asciiCode; // Mostrar el código ASCII en el puerto B
+}
+
 // ISR de recepción de UART
 ISR(USART_RX_vect) {
 	receivedChar = UDR0; // Almacena el carácter recibido
@@ -64,10 +108,7 @@ int main(void) {
 	// Habilitar interrupciones globales
 	sei();
 
-	writeTextUART("Hola Mundo");
-	while (1) {
-		loop(); // Loop principal
-	}
+	loop(); // Loop principal
 
 	return 0;
 }
