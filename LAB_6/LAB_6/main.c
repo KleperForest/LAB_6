@@ -7,7 +7,6 @@
 // Hardware: ATmega328p
 // Created: 4/18/2024 12:27:37 AM
 //*********************************************************************
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -22,10 +21,7 @@ void setup() {
 	// Configurar los pines del puerto B como salida (PB0 a PB7)
 	DDRB = 0xFF;
 
-	// Inicializar la UART a 9600 baudios
-	initUART9600();
-	// Inicializar el ADC para leer desde ADC6 (pin PC0)
-	initADC();
+ 
 }
 
 void loop() {
@@ -110,8 +106,6 @@ void sendASCII() {
 // ISR de recepción de UART
 ISR(USART_RX_vect) {
 	receivedChar = UDR0; // Almacena el carácter recibido
-	// Puedes agregar procesamiento adicional aquí antes de enviar de vuelta
-	// Envío de vuelta solo después de procesamiento si es necesario
 	while (!(UCSR0A &(1 << UDRE0))); // Enviar de regreso
 	UDR0 = receivedChar;
 }
