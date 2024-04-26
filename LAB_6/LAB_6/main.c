@@ -1,28 +1,28 @@
 #include <avr/io.h>
-#include <avr/interrupt.h>
 #include <util/delay.h>
-#include <stdio.h>
+#include <avr/interrupt.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #define F_CPU 16000000
 
 volatile char receivedChar = 0;
 
 void setup() {
-	// Configurar los pines del puerto B como salida (PB0 a PB3)
-	DDRB |= 0x0F;
-
-	// Configurar los pines del puerto D como salida (PD4 a PD7)
-	DDRD |= 0xF0;
+	// Configurar los pines del puerto B como salida (PB0 a PB7)
+	DDRB = 0xFF;
 
 	// Inicializar la UART a 9600 baudios
 	initUART9600();
+	// Inicializar el ADC para leer desde ADC6 (pin PC0)
+	initADC();
 }
 
 void loop() {
 	while (1) {
 		// Mostrar menú
 		writeTextUART("\n\rMenu:\n\r");
-		writeTextUART("1. Leer Potenciometro\n\r");
+		writeTextUART("1. Leer Potenciómetro\n\r");
 		writeTextUART("2. Enviar ASCII\n\r");
 		writeTextUART("Seleccione una opción: ");
 
@@ -66,20 +66,18 @@ void writeTextUART(char* Texto) {
 
 // Leer valor del potenciómetro
 void readPotentiometer() {
-	// Configurar ADC para leer el pin PC5
-	ADMUX = (1 << REFS0) | (1 << MUX0) | (1 << MUX2); // AVCC como referencia, PC5 como entrada
-	ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Habilitar ADC y configurar preescalador a 128
+	// Configurar ADC para leer el pin ADC6 (PC0)
+	ADMUX = (1 << REFS0) | (1 << MUX1) | (1 << MUX2); // AVCC como referencia, ADC6 como entrada
+	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Habilitar ADC, iniciar conversión y configurar preescalador a 128
 
-	ADCSRA |= (1 << ADSC); // Iniciar conversión
-	while (ADCSRA & (1 << ADSC)); // Esperar a que la conversión termine
+	// Esperar a que la conversión termine
+	while (ADCSRA & (1 << ADSC));
 
 	// Leer valor convertido
-	uint16_t value = ADC;
+	uint8_t value = ADCH;
 
-	// Mostrar valor en la terminal
-	char buffer[20];
-	sprintf(buffer, "\n\rValor del potenciómetro: %d\n\r", value);
-	writeTextUART(buffer);
+	// Mostrar valor en los LEDs del puerto B
+	PORTB = value;
 }
 
 // Enviar códigos ASCII
@@ -95,9 +93,8 @@ void sendASCII() {
 	sprintf(buffer, "\n\rEnviando código ASCII: %c\n\r", asciiCode);
 	writeTextUART(buffer);
 
-	// Mostrar el código ASCII en los pines de salida
-	PORTB = asciiCode & 0x0F; // Los 4 bits menos significativos en PB0 a PB3
-	PORTD = (asciiCode & 0xF0) >> 4; // Los 4 bits más significativos en PD4 a PD7
+	// Mostrar el código ASCII en los LEDs del puerto B
+	PORTB = asciiCode;
 }
 
 // ISR de recepción de UART
@@ -105,8 +102,14 @@ ISR(USART_RX_vect) {
 	receivedChar = UDR0; // Almacena el carácter recibido
 	// Puedes agregar procesamiento adicional aquí antes de enviar de vuelta
 	// Envío de vuelta solo después de procesamiento si es necesario
-	while(!(UCSR0A &(1<<UDRE0)));//Enviar de regreso
+	while (!(UCSR0A &(1 << UDRE0))); // Enviar de regreso
 	UDR0 = receivedChar;
+}
+
+// Inicialización del ADC
+void initADC() {
+	ADMUX = 0; // Configurar ADMUX inicialmente en 0 para leer desde ADC0 (PC0)
+	ADCSRA = 0; // Asegurarse de que ADC esté apagado inicialmente
 }
 
 int main(void) {
