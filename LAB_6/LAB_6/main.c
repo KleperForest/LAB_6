@@ -8,10 +8,14 @@
 volatile char receivedChar = 0;
 
 void setup() {
-	// Configurar el puerto B como salida
-	DDRB = 0xFF; // Todos los pines del puerto B como salidas
+	// Configurar los pines del puerto B como salida (PB0 a PB3)
+	DDRB |= 0x0F;
+
+	// Configurar los pines del puerto D como salida (PD4 a PD7)
+	DDRD |= 0xF0;
+
 	// Inicializar la UART a 9600 baudios
-	initUART9600(); // Inicializar UART a 9600 baudios
+	initUART9600();
 }
 
 void loop() {
@@ -90,7 +94,10 @@ void sendASCII() {
 	char buffer[20];
 	sprintf(buffer, "\n\rEnviando código ASCII: %c\n\r", asciiCode);
 	writeTextUART(buffer);
-	PORTB = asciiCode; // Mostrar el código ASCII en el puerto B
+
+	// Mostrar el código ASCII en los pines de salida
+	PORTB = asciiCode & 0x0F; // Los 4 bits menos significativos en PB0 a PB3
+	PORTD = (asciiCode & 0xF0) >> 4; // Los 4 bits más significativos en PD4 a PD7
 }
 
 // ISR de recepción de UART
